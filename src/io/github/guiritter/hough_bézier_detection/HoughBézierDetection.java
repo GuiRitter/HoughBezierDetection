@@ -7,11 +7,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import static java.lang.Double.NEGATIVE_INFINITY;
-import static java.lang.Double.POSITIVE_INFINITY;
-import static java.lang.Double.max;
-import static java.lang.Double.min;
 import static java.lang.Long.MIN_VALUE;
+import static java.lang.Math.PI;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.imageio.ImageIO;
@@ -21,10 +18,6 @@ import javax.imageio.ImageIO;
  * @author Guilherme Alan Ritter
  */
 public final class HoughBézierDetection {
-
-    private final double boundingBoxHeight;
-
-    private final double boundingBoxWidth;
 
     private final BézierCurve curve;
 
@@ -66,14 +59,16 @@ public final class HoughBézierDetection {
 
     private int y;
 
-    @SuppressWarnings("empty-statement")
+    @SuppressWarnings({"empty-statement", "CallToPrintStackTrace"})
     public final void detect(
      double translationStepX,
      double translationStepY,
+     double rotationStart,
+     double rotationRange,
      double rotationStep
     ) {
-        for (i = 0; (i * translationStepX) < ((int) (edgeMapWidth  - 1 - boundingBoxWidth )); i++, translationMaximumX = i);
-        for (i = 0; (i * translationStepY) < ((int) (edgeMapHeight - 1 - boundingBoxHeight)); i++, translationMaximumY = i);
+        for (i = 0; (i * translationStepX) < ((int) (edgeMapWidth )); i++, translationMaximumX = i);
+        for (i = 0; (i * translationStepY) < ((int) (edgeMapHeight)); i++, translationMaximumY = i);
         long matrix[][] = new long[translationMaximumY][translationMaximumX]; // TODO test
         long matrixMaximum = MIN_VALUE;
         for (y = 0; y < translationMaximumY; y++) {
@@ -94,6 +89,10 @@ public final class HoughBézierDetection {
                     curve.op(t);
                     x = (int) point.getX();
                     y = (int) point.getY();
+                    if ((x < 0) || (x >= edgeMapWidth )
+                     || (y < 0) || (y >= edgeMapHeight)) {
+                        continue;
+                    }
                     visitedPointCurveSet = visitedPointCurveMap.get(y);
                     if (visitedPointCurveSet == null) {
                         visitedPointCurveMap.put(y, visitedPointCurveSet = new HashSet<>());
@@ -103,9 +102,9 @@ public final class HoughBézierDetection {
                     }
                     visitedPointCurveSet.add(x);
                 }
-                for (int y : visitedPointCurveMap.keySet()) {
-                    for (int x : visitedPointCurveMap.get(y)) {
-                        if (edgeMapMatrix[y][x]) {
+                for (int yV : visitedPointCurveMap.keySet()) {
+                    for (int xV : visitedPointCurveMap.get(yV)) {
+                        if (edgeMapMatrix[yV][xV]) {
                             matrix[translationY][translationX]++;
                             matrixMaximum = Long.max(matrixMaximum, matrix[translationY][translationX]);
                         }
@@ -150,27 +149,6 @@ public final class HoughBézierDetection {
         }
         curve = new BézierCurve(this.pointControlArray, point);
         this.curveStep = curveStep;
-        {
-            double boundingBoxMinimumXTemporary = POSITIVE_INFINITY;
-            double boundingBoxMinimumYTemporary = POSITIVE_INFINITY;
-            double boundingBoxMaximumXTemporary = NEGATIVE_INFINITY;
-            double boundingBoxMaximumYTemporary = NEGATIVE_INFINITY;
-            for (t = 0; t < 1; t += 0.01) {
-                curve.op(t);
-                boundingBoxMinimumXTemporary = min(boundingBoxMinimumXTemporary, point.getX());
-                boundingBoxMinimumYTemporary = min(boundingBoxMinimumYTemporary, point.getY());
-                boundingBoxMaximumXTemporary = max(boundingBoxMaximumXTemporary, point.getX());
-                boundingBoxMaximumYTemporary = max(boundingBoxMaximumYTemporary, point.getY());
-            }
-            boundingBoxWidth  = boundingBoxMaximumXTemporary - boundingBoxMinimumXTemporary;
-            boundingBoxHeight = boundingBoxMaximumYTemporary - boundingBoxMinimumYTemporary;
-            for (Point2D pointT : pointControlOriginalArray) {
-                pointT.setLocation(
-                 pointT.getX() - boundingBoxMinimumXTemporary,
-                 pointT.getY() - boundingBoxMinimumYTemporary
-                );
-            }
-        }
         WritableRaster edgeMapRaster = edgeMapImage.getRaster();
         edgeMapMatrix = new boolean[edgeMapHeight][edgeMapWidth];
         int color[] = edgeMapRaster.getPixel(0, 0, (int[]) null);
@@ -178,6 +156,23 @@ public final class HoughBézierDetection {
             for (x = 0; x < edgeMapWidth; x++) {
                 edgeMapRaster.getPixel(x, y, color);
                 edgeMapMatrix[y][x] = color[0] > 0;
+            }
+        }
+        {
+            double centroidX = 0;
+            double centroidY = 0;
+            int centroidZ = 0;
+            for (t = 0; t < 1; t += 0.01) {
+                curve.op(t);
+                centroidX += point.getX();
+                centroidY += point.getY();
+                centroidZ++;
+            }
+            for (Point2D pointT : pointControlOriginalArray) {
+                pointT.setLocation(
+                 pointT.getX() - (centroidX / ((double) centroidZ)),
+                 pointT.getY() - (centroidY / ((double) centroidZ))
+                );
             }
         }
     }
@@ -197,6 +192,9 @@ public final class HoughBézierDetection {
         },
          0.01
         );
-        houghBézierDetection.detect(1, 1, 0.01);
+        houghBézierDetection.detect(1, 1,
+         -11d * PI / 180d,
+         +21d * PI / 180d,
+         PI / 180);
     }
 }
