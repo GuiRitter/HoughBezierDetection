@@ -1,4 +1,4 @@
-package io.github.guiritter.bézier_drawer;
+package io.github.guiritter.hough_bézier_detection.math;
 
 /**
  * A linear equation constructed from two points.
