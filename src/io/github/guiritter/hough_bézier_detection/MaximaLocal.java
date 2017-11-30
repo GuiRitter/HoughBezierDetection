@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
  *
  * @author Guilherme Alan Ritter
  */
-public final class Test {
+public final class MaximaLocal {
 
     private HashSet<Point3D> maximaLocalSet;
 
@@ -55,7 +55,7 @@ public final class Test {
 
     private int zMaximum;
 
-    public final HashSet<Point3D> maximaLocal(Point3D matrix[][][], long threshold) {
+    public final HashSet<Point3D> op(Point3D matrix[][][], long threshold) {
         maximaLocalSet = new HashSet<>();
         zMaximum = matrix.length;
         yMaximum = matrix[0].length;
@@ -113,7 +113,7 @@ public final class Test {
     }
 
     public static void main(String args[]) throws IOException {
-        Test test = new Test();
+        MaximaLocal maximaLocal = new MaximaLocal();
         /*
         Point3D matrix[][][] = new Point3D[][][]{
             {
@@ -140,11 +140,11 @@ public final class Test {
             }
         }
         /**/
-        HashSet<Point3D> maximaLocal = test.maximaLocal(matrix, 176);
+        HashSet<Point3D> maximaLocalSet = maximaLocal.op(matrix, 176);
         StringBuilder xBuilder = new StringBuilder("[");
         StringBuilder yBuilder = new StringBuilder("[");
         StringBuilder zBuilder = new StringBuilder("[");
-        for (Point3D point : maximaLocal) {
+        for (Point3D point : maximaLocalSet) {
             xBuilder.append(point.x).append(", ");
             yBuilder.append(point.y).append(", ");
             zBuilder.append(point.z).append(", ");
