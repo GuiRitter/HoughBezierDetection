@@ -1,4 +1,4 @@
-package io.github.guiritter.hough_bézier_detection;
+package io.github.guiritter.hough_bézier_detection.math;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -10,19 +10,38 @@ import java.util.HashSet;
 import javax.imageio.ImageIO;
 
 /**
- *
+ * Finds the local maxima in a 3D matrix. A value is considered a local maxima
+ * if it's greater than all values in it's 26-connected neighborhood.
+ * If it's equal to one value, it's still considered a local maxima
+ * if this value also satisfies these conditions. A threshold can be used
+ * to discard points with too low value.
  * @author Guilherme Alan Ritter
  */
 public final class MaximaLocal {
 
+    /**
+     * Set containing all local maxima found.
+     */
     private HashSet<Point3D> maximaLocalSet;
 
+    /**
+     * Point that need to have it's neighborhood tested.
+     */
     private Point3D pointCenter;
 
+    /**
+     * Center points that have had it's neighborhood tested.
+     */
     private final HashSet<Point3D> pointCenterTreated = new HashSet<>();
 
+    /**
+     * Center points with neighborhood pending to be tested.
+     */
     private final HashSet<Point3D> pointCenterTreating = new HashSet<>();
 
+    /**
+     * Neighbor points to center points pending to be tested.
+     */
     private final HashSet<Point3D> pointNeighborTreated = new HashSet<>();
 
     private int x;
@@ -55,6 +74,12 @@ public final class MaximaLocal {
 
     private int zMaximum;
 
+    /**
+     * Finds the local maxima.
+     * @param matrix
+     * @param threshold discards points with value below this value
+     * @return local maxima
+     */
     public final HashSet<Point3D> op(Point3D matrix[][][], long threshold) {
         maximaLocalSet = new HashSet<>();
         zMaximum = matrix.length;

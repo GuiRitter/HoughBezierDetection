@@ -2,6 +2,8 @@ package io.github.guiritter.hough_bézier_detection;
 
 import io.github.guiritter.hough_bézier_detection.math.BézierCurve;
 import io.github.guiritter.hough_bézier_detection.math.FitLinear;
+import io.github.guiritter.hough_bézier_detection.math.MaximaLocal;
+import io.github.guiritter.hough_bézier_detection.math.Point3D;
 import java.awt.Color;
 import static java.awt.Color.getHSBColor;
 import java.awt.geom.Point2D;
@@ -19,23 +21,35 @@ import java.util.HashSet;
 import javax.imageio.ImageIO;
 
 /**
+ * Detects the location and angle of a given Bézier curve in a given image
+ * using the Hough transform. The Bézier curve is represented
+ * by it's control points. The parameter space is translation of control points
+ * in {@code x} and {@code y} and rotation in radians.
  * @author Guilherme Alan Ritter
  */
 public final class HoughBézierDetection {
 
+    /**
+     * Holds the votes for each position and angle.
+     */
+    private Point3D accumulator[][][];
+
     private Color colorColor;
 
-    private final int colorInt[] = new int[3];
+    private int colorInt[] = new int[3];
 
     private final BézierCurve curve;
 
+    /**
+     * Inversely proportional to the density of points rendered in the curve.
+     */
     private final double curveStep;
 
     private final int edgeMapHeight;
 
     private final BufferedImage edgeMapImage;
 
-    private final boolean edgeMapMatrix[][];
+//    private final boolean edgeMapMatrix[][];
 
     private final WritableRaster edgeMapRaster;
 
@@ -46,8 +60,6 @@ public final class HoughBézierDetection {
     private int i;
 
     private BufferedImage image;
-
-    private Point3D matrix[][][];
 
     private final MaximaLocal maximaLocal = new MaximaLocal();
 
@@ -94,13 +106,31 @@ public final class HoughBézierDetection {
     private double yD;
 
     /**
+     * Applies the Hough transform, adapted for Bézier curves,
+     * finds the local maxima in the result and returns them
+     * and the original image with the detected curves overlayed.
+     * The control points are translated to the image origin with respect to
+     * the resulting curve's centroid. The parameters are integral steps
+     * multiplied by the provided step size, sweeping the curve
+     * from the image origin to its opposite border at different angles.
+     * The angle space is specified by a starting angle and a displacement,
+     * where the final angle will be the starting one plus the displacement,
+     * as well as an angle step size.
      *
-     * @param translationStepX
-     * @param translationStepY
-     * @param rotationStart
-     * @param rotationRange must be positive
-     * @param rotationStep must be positive
-     * @return
+     * After computing the transform, it will be searched for local maxima,
+     * which indicates potential curve detections. Local maxima can still occur
+     * at low levels of detection, so a threshold must be provided
+     * to filter these results. The original image is returned
+     * with the detected curves overlayed, for ease of inspection. They are
+     * color coded by their rotation. Blue represents the initial angle,
+     * going through green towards red, which is the final angle.
+     * @param translationStepX size of {@code x} translation increments
+     * @param translationStepY size of {@code y} translation increments
+     * @param rotationStart initial angle in radians
+     * @param rotationRange positive angle displacement in radians
+     * @param rotationStep positive size of rotation increment
+     * @param maximaLocalThreshold minimum value for local maxima detection
+     * @return set of local maxima and original image with detected curves
      */
     @SuppressWarnings({"empty-statement", "CallToPrintStackTrace"})
     public final MaximaLocalListAndImage detect(
@@ -114,15 +144,16 @@ public final class HoughBézierDetection {
         for (i = 0; (i * translationStepX) < edgeMapWidth ; i++, translationMaximumX = i);
         for (i = 0; (i * translationStepY) < edgeMapHeight; i++, translationMaximumY = i);
         for (i = 0; (i *    rotationStep ) < rotationRange; i++,    rotationMaximum  = i);
-        matrix = new Point3D[rotationMaximum][translationMaximumY][translationMaximumX]; // TODO test
+        accumulator = new Point3D[rotationMaximum][translationMaximumY][translationMaximumX]; // TODO test
         long matrixMaximum = MIN_VALUE;
         for (y = 0; y < translationMaximumY; y++) {
             for (x = 0; x < translationMaximumX; x++) {
                 for (i = 0; i < rotationMaximum; i++) {
-                    matrix[i][y][x] = new Point3D(x, y, i, 0);
+                    accumulator[i][y][x] = new Point3D(x, y, i, 0);
                 }
             }
         }
+        colorInt = new int[1];
         for (rotationI = 0; rotationI < rotationMaximum; rotationI++) {
             rotation = (rotationI * rotationStep) + rotationStart;
             for (i = 0; i < pointControlAmount; i++) {
@@ -162,9 +193,11 @@ public final class HoughBézierDetection {
                     }
                     for (int yV : visitedPointCurveMap.keySet()) {
                         for (int xV : visitedPointCurveMap.get(yV)) {
-                            if (edgeMapMatrix[yV][xV]) {
-                                matrix[rotationI][translationY][translationX].w++;
-                                matrixMaximum = Long.max(matrixMaximum, matrix[rotationI][translationY][translationX].w);
+                            edgeMapRaster.getPixel(x, y, colorInt);
+//                            if (edgeMapMatrix[yV][xV]) {
+                            if (colorInt[0] > 0) {
+                                accumulator[rotationI][translationY][translationX].w++;
+                                matrixMaximum = Long.max(matrixMaximum, accumulator[rotationI][translationY][translationX].w);
                             }
                         }
                     }
@@ -188,7 +221,7 @@ public final class HoughBézierDetection {
             }
         }
         /**/
-        maximaLocalSet = maximaLocal.op(matrix, maximaLocalThreshold);
+        maximaLocalSet = maximaLocal.op(accumulator, maximaLocalThreshold);
         image = new BufferedImage(edgeMapWidth, edgeMapHeight, TYPE_INT_RGB);
         raster = image.getRaster();
         for (y = 0; y < edgeMapHeight; y++) {
@@ -197,6 +230,7 @@ public final class HoughBézierDetection {
             }
         }
         fitLinear = new FitLinear(0, 2d / 3d, rotationMaximum - 1, 0);
+        colorInt = new int[3];
         for (Point3D point : maximaLocalSet) {
             rotation = (point.z * rotationStep) + rotationStart;
             for (i = 0; i < pointControlAmount; i++) {
@@ -254,14 +288,14 @@ public final class HoughBézierDetection {
         }
         curve = new BézierCurve(this.pointControlArray, pointBézier);
         this.curveStep = curveStep;
-        edgeMapMatrix = new boolean[edgeMapHeight][edgeMapWidth];
-        int color[] = edgeMapRaster.getPixel(0, 0, (int[]) null);
-        for (y = 0; y < edgeMapHeight; y++) {
-            for (x = 0; x < edgeMapWidth; x++) {
-                edgeMapRaster.getPixel(x, y, color);
-                edgeMapMatrix[y][x] = color[0] > 0;
-            }
-        }
+//        edgeMapMatrix = new boolean[edgeMapHeight][edgeMapWidth];
+//        int color[] = edgeMapRaster.getPixel(0, 0, (int[]) null);
+//        for (y = 0; y < edgeMapHeight; y++) {
+//            for (x = 0; x < edgeMapWidth; x++) {
+//                edgeMapRaster.getPixel(x, y, color);
+//                edgeMapMatrix[y][x] = color[0] > 0;
+//            }
+//        }
         double centroidX = 0;
         double centroidY = 0;
         int centroidZ = 0;

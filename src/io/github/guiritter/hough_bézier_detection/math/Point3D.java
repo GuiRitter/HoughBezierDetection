@@ -1,11 +1,14 @@
-package io.github.guiritter.hough_bézier_detection;
+package io.github.guiritter.hough_bézier_detection.math;
 
 /**
- *
+ * Point with 3D coordinates and value.
  * @author Guilherme Alan Ritter
  */
 public final class Point3D {
 
+    /**
+     * Value.
+     */
     public long w;
 
     public final int x;
