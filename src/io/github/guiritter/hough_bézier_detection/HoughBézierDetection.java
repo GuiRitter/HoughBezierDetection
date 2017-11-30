@@ -37,7 +37,7 @@ pra cada ponto xyz
 				coloca em pontosVizinhosPercorridos
 			se for maior
 				continua ponto_principal
-			se for igual e não estiver em pontosCentraisPercorridos
+			senão se for igual e não estiver em pontosCentraisPercorridos
 				coloca em pontosCentraisAPercorrer
 	adiciona em máximosLocais
 
