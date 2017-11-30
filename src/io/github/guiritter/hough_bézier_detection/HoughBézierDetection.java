@@ -17,6 +17,30 @@ import javax.imageio.ImageIO;
 
 /**
  * circle parabola
+ * https://www.mathworks.com/matlabcentral/answers/87196-maximum-value-in-a-3d-matrix
+
+ponto_principal:
+pra cada ponto xyz
+	se for menor que limiar
+		continua ponto_principal
+	coloca em pontosCentraisAPercorrer
+	enquanto houver pontosCentraisAPercorrer
+		tira um pontoCentralAPercorrer
+		se estiver em pontosCentraisPercorridos
+			continua
+		senão
+			coloca em pontosCentraisPercorridos
+		pra cada ponto vizinhos
+			se ponto vizinho estiver em pontosVizinhosPercorridos
+				continua
+			senão
+				coloca em pontosVizinhosPercorridos
+			se for maior
+				continua ponto_principal
+			se for igual e não estiver em pontosCentraisPercorridos
+				coloca em pontosCentraisAPercorrer
+	adiciona em máximosLocais
+
  * @author Guilherme Alan Ritter
  */
 public final class HoughBézierDetection {
