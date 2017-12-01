@@ -25,3 +25,13 @@ Then I used my [Bézier Drawer](https://github.com/GuiRitter/BezierDrawer) to ma
 ![cropped Hough Bézier Detection output](image/maxima_local_29.png)
 
 (cropped because I estimate doing it with the whole image will take about 40 minutes, but I'll do it)
+
+Although I tested this program with this capacitors image I shot myself, I wanted to use a dataset in the context of visual inspection / industrial machine vision, but I couldn't find such dataset. If someone knows if such a dataset exists and where, please tell me, I'll be glad to know about it. I'm looking for something like this:
+
+![desired dataset image 0](image/dataset_0.png) ![desired dataset image 1](image/dataset_1.png)
+
+Taken from:
+
+[Brandon Miles and Brian Surgenor (2011). Machine Vision for Inspection: A Case Study, Assembly Line -
+Theory and Practice, Prof. Waldemar Grzechca (Ed.), ISBN: 978-953-307-995-0, InTech, Available from:
+http://www.intechopen.com/books/assembly-line-theory-and-practice/machine-vision-for-inspection-a-casestudy](https://www.intechopen.com/books/assembly-line-theory-and-practice/machine-vision-for-inspection-a-case-study)
