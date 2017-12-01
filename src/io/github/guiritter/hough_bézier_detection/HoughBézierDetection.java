@@ -23,7 +23,7 @@ import javax.imageio.ImageIO;
 /**
  * Detects the location and angle of a given Bézier curve in a given image
  * using the Hough transform. The Bézier curve is represented
- * by it's control points. The parameter space is translation of control points
+ * by its control points. The parameter space is translation of control points
  * in {@code x} and {@code y} and rotation in radians.
  * @author Guilherme Alan Ritter
  */
@@ -193,7 +193,7 @@ public final class HoughBézierDetection {
                     }
                     for (int yV : visitedPointCurveMap.keySet()) {
                         for (int xV : visitedPointCurveMap.get(yV)) {
-                            edgeMapRaster.getPixel(x, y, colorInt);
+                            edgeMapRaster.getPixel(xV, yV, colorInt);
 //                            if (edgeMapMatrix[yV][xV]) {
                             if (colorInt[0] > 0) {
                                 accumulator[rotationI][translationY][translationX].w++;
@@ -333,7 +333,7 @@ public final class HoughBézierDetection {
          -11d * PI / 180d,
          +21d * PI / 180d,
          PI / 180d,
-         28);
-        ImageIO.write(detect.image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/maxima local.png"));
+         29);
+        ImageIO.write(detect.image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/maxima local 29.png"));
     }
 }
