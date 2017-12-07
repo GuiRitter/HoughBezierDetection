@@ -141,6 +141,9 @@ public final class HoughBézierDetection {
      double rotationStep,
      long maximaLocalThreshold
     ) {
+        translationMaximumX = 1;
+        translationMaximumY = 1;
+           rotationMaximum  = 1;
         for (i = 0; (i * translationStepX) < edgeMapWidth ; i++, translationMaximumX = i);
         for (i = 0; (i * translationStepY) < edgeMapHeight; i++, translationMaximumY = i);
         for (i = 0; (i *    rotationStep ) < rotationRange; i++,    rotationMaximum  = i);
@@ -165,7 +168,7 @@ public final class HoughBézierDetection {
                 );
             }
             for (translationY = 0; translationY < translationMaximumY; translationY++) {
-                System.out.println(rotationI + " < " + rotationMaximum + "\t\t" + translationY + " < " + translationMaximumY);
+//                System.out.println(rotationI + " < " + rotationMaximum + "\t\t" + translationY + " < " + translationMaximumY);
                 for (translationX = 0; translationX < translationMaximumX; translationX++) {
                     for (i = 0; i < pointControlAmount; i++) {
                         pointControlArray[i].setLocation(
@@ -204,24 +207,58 @@ public final class HoughBézierDetection {
                 }
             }
         }
+        maximaLocalSet = maximaLocal.op(accumulator, maximaLocalThreshold);
         /*
         fitLinear = new FitLinear(0, 0, matrixMaximum, 255);
+        colorInt = new int[3];
         for (rotationI = 0; rotationI < rotationMaximum; rotationI++) {
-            BufferedImage image = new BufferedImage(translationMaximumX, translationMaximumY, BufferedImage.TYPE_BYTE_GRAY);
+            BufferedImage image = new BufferedImage(translationMaximumX, translationMaximumY, TYPE_INT_RGB);
             WritableRaster raster = image.getRaster();
             for (y = 0; y < translationMaximumY; y++) {
                for (x = 0; x < translationMaximumX; x++) {
-                   raster.setPixel(x, y, new int[]{(int) Math.round(fitLinear.f(matrix[rotationI][y][x].w))});
+                   colorInt[0] = (int) Math.round(fitLinear.f(accumulator[rotationI][y][x].w));
+                   colorInt[2] = colorInt[1] = colorInt[0];
+                   raster.setPixel(x, y, colorInt);
                 }
             }
+            //
+            FitLinear colorFit = new FitLinear(0, 2d / 3d, rotationMaximum - 1, 0);
+            for (Point3D point : maximaLocalSet) {
+                if (point.z != rotationI) {
+                    continue;
+                }
+                rotation = (point.z * rotationStep) + rotationStart;
+                for (i = 0; i < pointControlAmount; i++) {
+                    xD = pointControlOriginalArray[i].getX();
+                    yD = pointControlOriginalArray[i].getY();
+                    pointControlArray[i].setLocation(
+                     (cos(rotation) * xD) - (sin(rotation) * yD) + (((double) point.x) * translationStepX),
+                     (sin(rotation) * xD) + (cos(rotation) * yD) + (((double) point.y) * translationStepY)
+                    );
+                }
+                colorColor = getHSBColor((float) colorFit.f(point.z), 1, 1);
+                colorInt[0] = colorColor.getRed();
+                colorInt[1] = colorColor.getGreen();
+                colorInt[2] = colorColor.getBlue();
+                for (t = 0; t < 1; t += curveStep) {
+                    curve.op(t);
+                    x = (int) pointBézier.getX();
+                    y = (int) pointBézier.getY();
+                    if ((x < 0) || (x >= edgeMapWidth )
+                     || (y < 0) || (y >= edgeMapHeight)) {
+                        continue;
+                    }
+                    raster.setPixel(x, y, colorInt);
+                }
+            }
+            //
             try {
-                ImageIO.write(image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/" + rotationI + ".png"));
+                ImageIO.write(image, "png", new File(String.format("/home/guir/NetBeansProjects/HoughBézierDetection/image/detect_%02d.png", rotationI)));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
         /**/
-        maximaLocalSet = maximaLocal.op(accumulator, maximaLocalThreshold);
         image = new BufferedImage(edgeMapWidth, edgeMapHeight, TYPE_INT_RGB);
         raster = image.getRaster();
         for (y = 0; y < edgeMapHeight; y++) {
@@ -314,26 +351,35 @@ public final class HoughBézierDetection {
     }
 
     public static final void main(String args[]) throws IOException {
-        HoughBézierDetection houghBézierDetection = new HoughBézierDetection(
-//         ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/curve 3.png")),
-//         ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/IMG_2809_750p_Canny.png")),
-         ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/IMG_2809_50p_Canny.png")),
-         new Point2D[]{
-            new Point2D.Double(46.68934740931896 ,  8.455795800042633),
+//        System.out.println(new Date());
+//        BufferedImage image = ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/curve 3.png"            ));
+//        BufferedImage image = ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/IMG_2809_750p_Canny.png"));
+        BufferedImage image = ImageIO.read(new File("/home/guir/NetBeansProjects/BézierFit/image/IMG_2809_50p_Canny.png"));
+        Point2D pointArray[] = new Point2D[]{
+            new Point2D.Double(46.68934740931896  , 8.455795800042633),
             new Point2D.Double(51.70876997504402 , 23.92517841953924 ),
             new Point2D.Double(43.241905835916654, 15.254723167927162),
             new Point2D.Double(23.145958846066904, 28.240495798740664),
-            new Point2D.Double(46.9533674635266  , 38.144264059312604),
-            new Point2D.Double(48.5363376237529  , 23.319259842584184),
-            new Point2D.Double(48.89321962067063 , 41.556246616451354)
-        },
-         0.01
+            new Point2D.Double(46.9533674635266,   38.144264059312604),
+            new Point2D.Double(48.5363376237529,   23.319259842584184),
+            new Point2D.Double(48.89321962067063,  41.556246616451354)
+        };
+//        long timeA = System.nanoTime();
+        HoughBézierDetection houghBézierDetection = new HoughBézierDetection(
+         image, pointArray, 0.01
         );
         MaximaLocalListAndImage detect = houghBézierDetection.detect(1, 1,
          -11d * PI / 180d,
          +21d * PI / 180d,
          PI / 180d,
          29);
-        ImageIO.write(detect.image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/maxima local 29.png"));
+//        long timeB = System.nanoTime();
+//        ImageIO.write(detect.image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/maxima local 29 750p.png"));
+//        for (Point3D point : detect.maximaLocalSet) {
+//            System.out.println(point);
+//        }
+//        System.out.println(new Date());
+//        System.out.println(timeB - timeA);
+//        JOptionPane.showMessageDialog(null, "done");
     }
 }
