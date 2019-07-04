@@ -1,4 +1,4 @@
-package io.github.guiritter.hough_bézier_detection.math;
+package io.github.guiritter.hough_bezier_detection.math;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -114,7 +114,7 @@ public final class MaximaLocal {
                         zHigh = min(pointCenter.z + 1, zMaximum - 1);
                         for (zN = zLow; zN <= zHigh; zN++) {
                             for (yN = yLow; yN <= yHigh; yN++) {
-                                point_neighbor:
+                                // point_neighbor:
                                 for (xN = xLow; xN <= xHigh; xN++) {
                                     if (pointNeighborTreated.contains(matrix[zN][yN][xN])) {
                                         continue /*point_neighbor*/;

@@ -35,3 +35,5 @@ Taken from:
 [Brandon Miles and Brian Surgenor (2011). Machine Vision for Inspection: A Case Study, Assembly Line -
 Theory and Practice, Prof. Waldemar Grzechca (Ed.), ISBN: 978-953-307-995-0, InTech, Available from:
 http://www.intechopen.com/books/assembly-line-theory-and-practice/machine-vision-for-inspection-a-casestudy](https://www.intechopen.com/books/assembly-line-theory-and-practice/machine-vision-for-inspection-a-case-study)
+
+[A few words about Maven.](https://gist.github.com/GuiRitter/1834bd024756e08ab422026a7cd24605)

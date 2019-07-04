@@ -1,6 +1,6 @@
-package io.github.guiritter.hough_bézier_detection;
+package io.github.guiritter.hough_bezier_detection;
 
-import io.github.guiritter.hough_bézier_detection.math.Point3D;
+import io.github.guiritter.hough_bezier_detection.math.Point3D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 

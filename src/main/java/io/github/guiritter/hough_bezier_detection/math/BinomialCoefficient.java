@@ -1,4 +1,4 @@
-package io.github.guiritter.hough_bézier_detection.math;
+package io.github.guiritter.hough_bezier_detection.math;
 
 import static java.lang.Math.min;
 

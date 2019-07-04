@@ -1,9 +1,9 @@
-package io.github.guiritter.hough_bézier_detection;
+package io.github.guiritter.hough_bezier_detection;
 
-import io.github.guiritter.hough_bézier_detection.math.BézierCurve;
-import io.github.guiritter.hough_bézier_detection.math.FitLinear;
-import io.github.guiritter.hough_bézier_detection.math.MaximaLocal;
-import io.github.guiritter.hough_bézier_detection.math.Point3D;
+import io.github.guiritter.fit_linear.FitLinear;
+import io.github.guiritter.hough_bezier_detection.math.BezierCurve;
+import io.github.guiritter.hough_bezier_detection.math.MaximaLocal;
+import io.github.guiritter.hough_bezier_detection.math.Point3D;
 import java.awt.Color;
 import static java.awt.Color.getHSBColor;
 import java.awt.geom.Point2D;
@@ -27,7 +27,7 @@ import javax.imageio.ImageIO;
  * in {@code x} and {@code y} and rotation in radians.
  * @author Guilherme Alan Ritter
  */
-public final class HoughBézierDetection {
+public final class HoughBezierDetection {
 
     /**
      * Holds the votes for each position and angle.
@@ -38,7 +38,7 @@ public final class HoughBézierDetection {
 
     private int colorInt[] = new int[3];
 
-    private final BézierCurve curve;
+    private final BezierCurve curve;
 
     /**
      * Inversely proportional to the density of points rendered in the curve.
@@ -65,7 +65,7 @@ public final class HoughBézierDetection {
 
     private HashSet<Point3D> maximaLocalSet;
 
-    private final Point2D pointBézier = new Point2D.Double();
+    private final Point2D pointBezier = new Point2D.Double();
 
     private final int pointControlAmount;
 
@@ -132,7 +132,6 @@ public final class HoughBézierDetection {
      * @param maximaLocalThreshold minimum value for local maxima detection
      * @return set of local maxima and original image with detected curves
      */
-    @SuppressWarnings({"empty-statement", "CallToPrintStackTrace"})
     public final MaximaLocalListAndImage detect(
      double translationStepX,
      double translationStepY,
@@ -168,7 +167,7 @@ public final class HoughBézierDetection {
                 );
             }
             for (translationY = 0; translationY < translationMaximumY; translationY++) {
-//                System.out.println(rotationI + " < " + rotationMaximum + "\t\t" + translationY + " < " + translationMaximumY);
+               System.out.println(rotationI + " < " + rotationMaximum + "\t\t" + translationY + " < " + translationMaximumY);
                 for (translationX = 0; translationX < translationMaximumX; translationX++) {
                     for (i = 0; i < pointControlAmount; i++) {
                         pointControlArray[i].setLocation(
@@ -179,8 +178,8 @@ public final class HoughBézierDetection {
                     visitedPointCurveMap.clear();
                     for (t = 0; t < 1; t += curveStep) {
                         curve.op(t);
-                        x = (int) pointBézier.getX();
-                        y = (int) pointBézier.getY();
+                        x = (int) pointBezier.getX();
+                        y = (int) pointBezier.getY();
                         if ((x < 0) || (x >= edgeMapWidth )
                          || (y < 0) || (y >= edgeMapHeight)) {
                             continue;
@@ -242,8 +241,8 @@ public final class HoughBézierDetection {
                 colorInt[2] = colorColor.getBlue();
                 for (t = 0; t < 1; t += curveStep) {
                     curve.op(t);
-                    x = (int) pointBézier.getX();
-                    y = (int) pointBézier.getY();
+                    x = (int) pointBezier.getX();
+                    y = (int) pointBezier.getY();
                     if ((x < 0) || (x >= edgeMapWidth )
                      || (y < 0) || (y >= edgeMapHeight)) {
                         continue;
@@ -284,8 +283,8 @@ public final class HoughBézierDetection {
             colorInt[2] = colorColor.getBlue();
             for (t = 0; t < 1; t += curveStep) {
                 curve.op(t);
-                x = (int) pointBézier.getX();
-                y = (int) pointBézier.getY();
+                x = (int) pointBezier.getX();
+                y = (int) pointBezier.getY();
                 if ((x < 0) || (x >= edgeMapWidth )
                  || (y < 0) || (y >= edgeMapHeight)) {
                     continue;
@@ -296,7 +295,7 @@ public final class HoughBézierDetection {
         return new MaximaLocalListAndImage(maximaLocalSet, image);
     }
 
-    public HoughBézierDetection(
+    public HoughBezierDetection(
      BufferedImage edgeMapImage,
      Point2D pointControlArray[],
      double curveStep
@@ -323,7 +322,7 @@ public final class HoughBézierDetection {
              pointControlArray[i].getY()
             );
         }
-        curve = new BézierCurve(this.pointControlArray, pointBézier);
+        curve = new BezierCurve(this.pointControlArray, pointBezier);
         this.curveStep = curveStep;
 //        edgeMapMatrix = new boolean[edgeMapHeight][edgeMapWidth];
 //        int color[] = edgeMapRaster.getPixel(0, 0, (int[]) null);
@@ -338,8 +337,8 @@ public final class HoughBézierDetection {
         int centroidZ = 0;
         for (t = 0; t < 1; t += 0.01) {
             curve.op(t);
-            centroidX += pointBézier.getX();
-            centroidY += pointBézier.getY();
+            centroidX += pointBezier.getX();
+            centroidY += pointBezier.getY();
             centroidZ++;
         }
         for (Point2D point : pointControlOriginalArray) {
@@ -364,22 +363,22 @@ public final class HoughBézierDetection {
             new Point2D.Double(48.5363376237529,   23.319259842584184),
             new Point2D.Double(48.89321962067063,  41.556246616451354)
         };
-//        long timeA = System.nanoTime();
-        HoughBézierDetection houghBézierDetection = new HoughBézierDetection(
+       long timeA = System.nanoTime();
+        HoughBezierDetection houghBezierDetection = new HoughBezierDetection(
          image, pointArray, 0.01
         );
-        MaximaLocalListAndImage detect = houghBézierDetection.detect(1, 1,
+        MaximaLocalListAndImage detect = houghBezierDetection.detect(1, 1,
          -11d * PI / 180d,
          +21d * PI / 180d,
          PI / 180d,
          29);
-//        long timeB = System.nanoTime();
+       long timeB = System.nanoTime();
 //        ImageIO.write(detect.image, "png", new File("/home/guir/NetBeansProjects/HoughBézierDetection/image/maxima local 29 750p.png"));
 //        for (Point3D point : detect.maximaLocalSet) {
 //            System.out.println(point);
 //        }
 //        System.out.println(new Date());
-//        System.out.println(timeB - timeA);
+       System.out.println(timeB - timeA);
 //        JOptionPane.showMessageDialog(null, "done");
     }
 }

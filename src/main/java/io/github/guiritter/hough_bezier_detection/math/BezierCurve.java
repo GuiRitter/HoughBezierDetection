@@ -1,4 +1,4 @@
-package io.github.guiritter.hough_bézier_detection.math;
+package io.github.guiritter.hough_bezier_detection.math;
 
 import java.awt.geom.Point2D;
 import static java.lang.Math.pow;
@@ -7,11 +7,11 @@ import static java.lang.Math.pow;
  * Computes a Bézier curve from a list of control points.
  * @author Guilherme Alan Ritter
  */
-public final class BézierCurve {
+public final class BezierCurve {
 
     private double b;
 
-    private final Point2D BézierControlPointList[];
+    private final Point2D BezierControlPointList[];
 
     private final BinomialCoefficient binomialCoefficient = new BinomialCoefficient();
 
@@ -32,17 +32,17 @@ public final class BézierCurve {
     public void op(double t) {
         x = 0;
         y = 0;
-        n = BézierControlPointList.length - 1;
+        n = BezierControlPointList.length - 1;
         for (i = 0; i <= n; i++) {
             b = ((double) binomialCoefficient.op(n, i)) * pow(t, (double) i) * pow(1.0 - t, (double) (n - i));
-            x += BézierControlPointList[(int) i].getX() * b;
-            y += BézierControlPointList[(int) i].getY() * b;
+            x += BezierControlPointList[(int) i].getX() * b;
+            y += BezierControlPointList[(int) i].getY() * b;
         }
         output.setLocation(x, y);
     }
 
-    public BézierCurve(Point2D BézierControlPointList[], Point2D output) {
-        this.BézierControlPointList = BézierControlPointList;
+    public BezierCurve(Point2D BezierControlPointList[], Point2D output) {
+        this.BezierControlPointList = BezierControlPointList;
         this.output = output;
     }
 }
